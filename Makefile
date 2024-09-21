@@ -10,4 +10,4 @@ run: build
 	./bin/backend
 
 docker-image: gen-sql
-	sudo docker build ./backend/ -t pablu/blinkscan-backend:$(VERSION)
+	docker build ./backend/ -t pablu/blinkscan-backend:$(VERSION) -t pablu/blinkscan-backend:latest
