@@ -9,5 +9,5 @@ gen-sql:
 run: build
 	./bin/backend
 
-docker-image: gen-sql
+image: gen-sql
 	docker build ./backend/ -t pablu/blinkscan-backend:$(VERSION) -t pablu/blinkscan-backend:latest
