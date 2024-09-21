@@ -10,7 +10,7 @@ import (
 
 type Account struct {
 	ID            pgtype.UUID
-	Accountname   string
+	Name          string
 	Base64PwdHash string
 	Base64PwdSalt string
 }

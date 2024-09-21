@@ -42,7 +42,7 @@ create table chapter_image (
 
 create table account (
   id uuid PRIMARY KEY,
-  accountname text not null unique,
+  name text not null unique,
   base64_pwd_hash text not null,
   base64_pwd_salt text not null
 );
