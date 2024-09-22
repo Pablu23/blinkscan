@@ -8,7 +8,7 @@ package database
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createSession = `-- name: CreateSession :one
@@ -20,7 +20,7 @@ insert into session (
 RETURNING id, account_id, created
 `
 
-func (q *Queries) CreateSession(ctx context.Context, accountID pgtype.UUID) (Session, error) {
+func (q *Queries) CreateSession(ctx context.Context, accountID uuid.UUID) (Session, error) {
 	row := q.db.QueryRow(ctx, createSession, accountID)
 	var i Session
 	err := row.Scan(&i.ID, &i.AccountID, &i.Created)
@@ -28,32 +28,19 @@ func (q *Queries) CreateSession(ctx context.Context, accountID pgtype.UUID) (Ses
 }
 
 const getUserForSession = `-- name: GetUserForSession :one
-select a.id, name, base64_pwd_hash, base64_pwd_salt, s.id, account_id, created from account as a
+select a.id, a.name, a.base64_pwd_hash, a.base64_pwd_salt from account as a
 join session as s on a.id = s.account_id
 where s.id = $1
 `
 
-type GetUserForSessionRow struct {
-	ID            pgtype.UUID
-	Name          string
-	Base64PwdHash string
-	Base64PwdSalt string
-	ID_2          pgtype.UUID
-	AccountID     pgtype.UUID
-	Created       pgtype.Timestamp
-}
-
-func (q *Queries) GetUserForSession(ctx context.Context, id pgtype.UUID) (GetUserForSessionRow, error) {
+func (q *Queries) GetUserForSession(ctx context.Context, id uuid.UUID) (Account, error) {
 	row := q.db.QueryRow(ctx, getUserForSession, id)
-	var i GetUserForSessionRow
+	var i Account
 	err := row.Scan(
 		&i.ID,
 		&i.Name,
 		&i.Base64PwdHash,
 		&i.Base64PwdSalt,
-		&i.ID_2,
-		&i.AccountID,
-		&i.Created,
 	)
 	return i, err
 }

@@ -8,7 +8,7 @@ package database
 import (
 	"context"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/google/uuid"
 )
 
 const createChapter = `-- name: CreateChapter :one
@@ -23,7 +23,7 @@ returning id, title, number, manga_id
 type CreateChapterParams struct {
 	Title   string
 	Number  int32
-	MangaID pgtype.UUID
+	MangaID uuid.UUID
 }
 
 func (q *Queries) CreateChapter(ctx context.Context, arg CreateChapterParams) (Chapter, error) {
@@ -43,7 +43,7 @@ select id, title, number, manga_id from chapter
 where id = $1
 `
 
-func (q *Queries) GetChapter(ctx context.Context, id pgtype.UUID) (Chapter, error) {
+func (q *Queries) GetChapter(ctx context.Context, id uuid.UUID) (Chapter, error) {
 	row := q.db.QueryRow(ctx, getChapter, id)
 	var i Chapter
 	err := row.Scan(
@@ -60,7 +60,7 @@ select chapter_id, image_id, alignment from chapter_image
 where chapter_id = $1
 `
 
-func (q *Queries) GetChapterImages(ctx context.Context, chapterID pgtype.UUID) ([]ChapterImage, error) {
+func (q *Queries) GetChapterImages(ctx context.Context, chapterID uuid.UUID) ([]ChapterImage, error) {
 	rows, err := q.db.Query(ctx, getChapterImages, chapterID)
 	if err != nil {
 		return nil, err

@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -43,7 +44,7 @@ select id, name, base64_pwd_hash, base64_pwd_salt from account
 where id = $1
 `
 
-func (q *Queries) GetAccount(ctx context.Context, id pgtype.UUID) (Account, error) {
+func (q *Queries) GetAccount(ctx context.Context, id uuid.UUID) (Account, error) {
 	row := q.db.QueryRow(ctx, getAccount, id)
 	var i Account
 	err := row.Scan(
@@ -109,20 +110,20 @@ where asm.account_id = $1
 `
 
 type GetSubscribedForAccountRow struct {
-	ID            pgtype.UUID
-	ProviderID    pgtype.UUID
+	ID            uuid.UUID
+	ProviderID    uuid.UUID
 	Title         string
 	ThumbnailID   pgtype.UUID
 	LatestChapter pgtype.Int4
 	RequestedFrom pgtype.UUID
 	LastUpdated   pgtype.Timestamp
 	Created       pgtype.Timestamp
-	ID_2          pgtype.UUID
-	AccountID     pgtype.UUID
-	MangaID       pgtype.UUID
+	ID_2          uuid.UUID
+	AccountID     uuid.UUID
+	MangaID       uuid.UUID
 }
 
-func (q *Queries) GetSubscribedForAccount(ctx context.Context, accountID pgtype.UUID) ([]GetSubscribedForAccountRow, error) {
+func (q *Queries) GetSubscribedForAccount(ctx context.Context, accountID uuid.UUID) ([]GetSubscribedForAccountRow, error) {
 	rows, err := q.db.Query(ctx, getSubscribedForAccount, accountID)
 	if err != nil {
 		return nil, err
@@ -163,18 +164,18 @@ and c.manga_id = $2
 `
 
 type GetViewedForAccountAndMangaParams struct {
-	AccountID pgtype.UUID
-	MangaID   pgtype.UUID
+	AccountID uuid.UUID
+	MangaID   uuid.UUID
 }
 
 type GetViewedForAccountAndMangaRow struct {
-	ID        pgtype.UUID
+	ID        uuid.UUID
 	Title     string
 	Number    int32
-	MangaID   pgtype.UUID
-	ID_2      pgtype.UUID
-	AccountID pgtype.UUID
-	ChapterID pgtype.UUID
+	MangaID   uuid.UUID
+	ID_2      uuid.UUID
+	AccountID uuid.UUID
+	ChapterID uuid.UUID
 	ViewedAt  pgtype.Timestamp
 }
 

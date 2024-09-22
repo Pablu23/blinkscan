@@ -7,6 +7,6 @@ insert into session (
 RETURNING *;
 
 -- name: GetUserForSession :one
-select * from account as a
+select a.* from account as a
 join session as s on a.id = s.account_id
 where s.id = $1;

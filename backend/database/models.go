@@ -5,50 +5,51 @@
 package database
 
 import (
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Account struct {
-	ID            pgtype.UUID
+	ID            uuid.UUID
 	Name          string
 	Base64PwdHash string
 	Base64PwdSalt string
 }
 
 type AccountSubscribedManga struct {
-	ID        pgtype.UUID
-	AccountID pgtype.UUID
-	MangaID   pgtype.UUID
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	MangaID   uuid.UUID
 }
 
 type AccountViewedChapter struct {
-	ID        pgtype.UUID
-	AccountID pgtype.UUID
-	ChapterID pgtype.UUID
+	ID        uuid.UUID
+	AccountID uuid.UUID
+	ChapterID uuid.UUID
 	ViewedAt  pgtype.Timestamp
 }
 
 type Chapter struct {
-	ID      pgtype.UUID
+	ID      uuid.UUID
 	Title   string
 	Number  int32
-	MangaID pgtype.UUID
+	MangaID uuid.UUID
 }
 
 type ChapterImage struct {
-	ChapterID pgtype.UUID
-	ImageID   pgtype.UUID
+	ChapterID uuid.UUID
+	ImageID   uuid.UUID
 	Alignment int32
 }
 
 type Image struct {
-	ID   pgtype.UUID
+	ID   uuid.UUID
 	Path string
 }
 
 type Manga struct {
-	ID            pgtype.UUID
-	ProviderID    pgtype.UUID
+	ID            uuid.UUID
+	ProviderID    uuid.UUID
 	Title         string
 	ThumbnailID   pgtype.UUID
 	LatestChapter pgtype.Int4
@@ -58,13 +59,13 @@ type Manga struct {
 }
 
 type Provider struct {
-	ID   pgtype.UUID
+	ID   uuid.UUID
 	Url  string
 	Name string
 }
 
 type Session struct {
-	ID        pgtype.UUID
-	AccountID pgtype.UUID
+	ID        uuid.UUID
+	AccountID uuid.UUID
 	Created   pgtype.Timestamp
 }

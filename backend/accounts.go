@@ -13,7 +13,6 @@ import (
 	"github.com/jackc/pgx/v5"
 	"github.com/pablu23/blinkscan/backend/database"
 	"github.com/pablu23/blinkscan/backend/transport"
-	"github.com/pablu23/blinkscan/backend/util"
 	"github.com/rs/zerolog/log"
 )
 
@@ -99,13 +98,13 @@ func (s *Service) PostAccountLogin(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		session, err := s.db.CreateSession(ctx, acc.ID)
 		if err != nil {
-			log.Error().Err(err).Str("account", util.UUIDToString(acc.ID)).Msg("Could not create session")
+			log.Error().Err(err).Str("account", acc.ID.String()).Msg("Could not create session")
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-    
-    //TODO: Dont use uuid, use cryptographically secure "fingerprint"
-		w.Write([]byte(util.UUIDToString(session.ID)))
+
+		//TODO: Dont use uuid, use cryptographically secure "fingerprint"
+		w.Write([]byte(session.ID.String()))
 		//TODO: return jwt token
 	} else {
 		log.Debug().Str("username", loginCredentials.Username).Msg("Login failed")

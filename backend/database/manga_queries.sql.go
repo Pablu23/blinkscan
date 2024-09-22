@@ -8,6 +8,7 @@ package database
 import (
 	"context"
 
+	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
@@ -21,7 +22,7 @@ returning id, provider_id, title, thumbnail_id, latest_chapter, requested_from, 
 `
 
 type CreateMangaParams struct {
-	ProviderID    pgtype.UUID
+	ProviderID    uuid.UUID
 	Title         string
 	RequestedFrom pgtype.UUID
 }
@@ -47,7 +48,7 @@ select id, provider_id, title, thumbnail_id, latest_chapter, requested_from, las
 where id = $1
 `
 
-func (q *Queries) GetManga(ctx context.Context, id pgtype.UUID) (Manga, error) {
+func (q *Queries) GetManga(ctx context.Context, id uuid.UUID) (Manga, error) {
 	row := q.db.QueryRow(ctx, getManga, id)
 	var i Manga
 	err := row.Scan(
@@ -103,20 +104,20 @@ where asm.account_id = $1
 `
 
 type GetMangasForUserRow struct {
-	ID            pgtype.UUID
-	ProviderID    pgtype.UUID
+	ID            uuid.UUID
+	ProviderID    uuid.UUID
 	Title         string
 	ThumbnailID   pgtype.UUID
 	LatestChapter pgtype.Int4
 	RequestedFrom pgtype.UUID
 	LastUpdated   pgtype.Timestamp
 	Created       pgtype.Timestamp
-	ID_2          pgtype.UUID
-	AccountID     pgtype.UUID
-	MangaID       pgtype.UUID
+	ID_2          uuid.UUID
+	AccountID     uuid.UUID
+	MangaID       uuid.UUID
 }
 
-func (q *Queries) GetMangasForUser(ctx context.Context, accountID pgtype.UUID) ([]GetMangasForUserRow, error) {
+func (q *Queries) GetMangasForUser(ctx context.Context, accountID uuid.UUID) ([]GetMangasForUserRow, error) {
 	rows, err := q.db.Query(ctx, getMangasForUser, accountID)
 	if err != nil {
 		return nil, err
