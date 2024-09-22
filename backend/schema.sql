@@ -1,5 +1,5 @@
 create table provider (
-  id uuid PRIMARY KEY not null default gen_random_uuid(),
+  id uuid PRIMARY KEY not null,
   url text not null,
   name text not null
 );
@@ -61,5 +61,12 @@ create table account_viewed_chapter (
   chapter_id uuid not null,
   viewed_at timestamp not null,
   FOREIGN KEY(chapter_id) REFERENCES chapter(id),
+  FOREIGN KEY(account_id) REFERENCES account(id)
+);
+
+create table session (
+  id uuid PRIMARY KEY not null default gen_random_uuid(),
+  account_id uuid not null unique,
+  created timestamp not null default now(),
   FOREIGN KEY(account_id) REFERENCES account(id)
 );

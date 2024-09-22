@@ -62,3 +62,9 @@ type Provider struct {
 	Url  string
 	Name string
 }
+
+type Session struct {
+	ID        pgtype.UUID
+	AccountID pgtype.UUID
+	Created   pgtype.Timestamp
+}
