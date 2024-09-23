@@ -14,6 +14,6 @@ insert into manga (
 returning *;
 
 -- name: GetMangasForUser :many
-select * from manga as m
+select m.* from manga as m
 join account_subscribed_manga as asm on asm.manga_id = m.id
 where asm.account_id = $1;

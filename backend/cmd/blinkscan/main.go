@@ -40,14 +40,18 @@ func main() {
 
 	privateMux := http.NewServeMux()
 	privateMux.HandleFunc("GET /test", func(w http.ResponseWriter, r *http.Request) {
-		user := r.Context().Value("user").(database.Account)
+		user := backend.MustGetAccount(ctx)
 		w.Write([]byte(fmt.Sprintf("Hello %s", user.Name)))
 	})
 
 	auth := middleware.Auth(queries)
 	mux := http.NewServeMux()
+	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+	})
+
 	mux.Handle("/api/", http.StripPrefix("/api", auth(privateMux)))
-	mux.Handle("/", publicMux)
+	mux.Handle("/api/public/", http.StripPrefix("/api/public", publicMux))
 
 	server := http.Server{
 		Addr:    ":8080",

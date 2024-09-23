@@ -98,34 +98,20 @@ func (q *Queries) GetMangas(ctx context.Context) ([]Manga, error) {
 }
 
 const getMangasForUser = `-- name: GetMangasForUser :many
-select m.id, provider_id, title, thumbnail_id, latest_chapter, requested_from, last_updated, created, asm.id, account_id, manga_id from manga as m
+select m.id, m.provider_id, m.title, m.thumbnail_id, m.latest_chapter, m.requested_from, m.last_updated, m.created from manga as m
 join account_subscribed_manga as asm on asm.manga_id = m.id
 where asm.account_id = $1
 `
 
-type GetMangasForUserRow struct {
-	ID            uuid.UUID
-	ProviderID    uuid.UUID
-	Title         string
-	ThumbnailID   pgtype.UUID
-	LatestChapter pgtype.Int4
-	RequestedFrom pgtype.UUID
-	LastUpdated   pgtype.Timestamp
-	Created       pgtype.Timestamp
-	ID_2          uuid.UUID
-	AccountID     uuid.UUID
-	MangaID       uuid.UUID
-}
-
-func (q *Queries) GetMangasForUser(ctx context.Context, accountID uuid.UUID) ([]GetMangasForUserRow, error) {
+func (q *Queries) GetMangasForUser(ctx context.Context, accountID uuid.UUID) ([]Manga, error) {
 	rows, err := q.db.Query(ctx, getMangasForUser, accountID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetMangasForUserRow
+	var items []Manga
 	for rows.Next() {
-		var i GetMangasForUserRow
+		var i Manga
 		if err := rows.Scan(
 			&i.ID,
 			&i.ProviderID,
@@ -135,9 +121,6 @@ func (q *Queries) GetMangasForUser(ctx context.Context, accountID uuid.UUID) ([]
 			&i.RequestedFrom,
 			&i.LastUpdated,
 			&i.Created,
-			&i.ID_2,
-			&i.AccountID,
-			&i.MangaID,
 		); err != nil {
 			return nil, err
 		}

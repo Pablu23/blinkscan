@@ -34,6 +34,7 @@ create table chapter (
   id uuid PRIMARY KEY not null default gen_random_uuid(),
   title text not null,
   "number" int not null,
+  url text not null,
   manga_id uuid not null,
   FOREIGN KEY(manga_id) REFERENCES manga(id)
 );
