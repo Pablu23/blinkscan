@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"net/http"
 	"os"
 
@@ -33,31 +32,27 @@ func main() {
 
 	queries := database.New(conn)
 	service := blinkscan.NewService(queries)
-	frontend := http.FileServer(http.Dir("./frontend/browser"))
 
 	publicMux := http.NewServeMux()
-	publicMux.HandleFunc("POST /account", service.PostAccount)
-	publicMux.HandleFunc("POST /account/login", service.PostAccountLogin)
-	publicMux.Handle("/", frontend)
+	service.RegisterPublicRoutes(publicMux)
 
 	privateMux := http.NewServeMux()
-	privateMux.HandleFunc("GET /test", func(w http.ResponseWriter, r *http.Request) {
-		user := blinkscan.MustGetAccount(ctx)
-		w.Write([]byte(fmt.Sprintf("Hello %s", user.Name)))
-	})
+	service.RegisterPrivateRoutes(privateMux)
 
 	auth := middleware.Auth(queries)
-	mux := http.NewServeMux()
-	mux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
+	frontend := http.FileServer(http.Dir("./frontend/browser"))
+
+	rootMux := http.NewServeMux()
+	rootMux.Handle("/", frontend)
+	rootMux.Handle("/api/", http.StripPrefix("/api", auth(privateMux)))
+	rootMux.Handle("/api/public/", http.StripPrefix("/api/public", publicMux))
+	rootMux.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	mux.Handle("/api/", http.StripPrefix("/api", auth(privateMux)))
-	mux.Handle("/", publicMux)
-
 	server := http.Server{
 		Addr:    ":8080",
-		Handler: mux,
+		Handler: rootMux,
 	}
 
 	err = server.ListenAndServe()
