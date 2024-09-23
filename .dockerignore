@@ -1,0 +1,5 @@
+.gitignore
+.template.env
+Makefile
+README.md
+docker-compose.yml
