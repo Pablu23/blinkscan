@@ -1,4 +1,4 @@
-package backend
+package blinkscan
 
 import (
 	"bytes"
@@ -11,8 +11,8 @@ import (
 	"net/http"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/pablu23/blinkscan/backend/database"
-	"github.com/pablu23/blinkscan/backend/transport"
+	"github.com/pablu23/blinkscan/database"
+	"github.com/pablu23/blinkscan/transport"
 	"github.com/rs/zerolog/log"
 )
 

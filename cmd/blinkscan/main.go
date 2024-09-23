@@ -7,10 +7,10 @@ import (
 	"os"
 
 	"github.com/jackc/pgx/v5"
-	"github.com/pablu23/blinkscan/backend"
-	"github.com/pablu23/blinkscan/backend/config"
-	"github.com/pablu23/blinkscan/backend/database"
-	"github.com/pablu23/blinkscan/backend/middleware"
+	"github.com/pablu23/blinkscan"
+	"github.com/pablu23/blinkscan/config"
+	"github.com/pablu23/blinkscan/database"
+	"github.com/pablu23/blinkscan/middleware"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -32,15 +32,17 @@ func main() {
 	defer conn.Close(ctx)
 
 	queries := database.New(conn)
-	service := backend.NewService(queries)
+	service := blinkscan.NewService(queries)
+	frontend := http.FileServer(http.Dir("./frontend/browser"))
 
 	publicMux := http.NewServeMux()
 	publicMux.HandleFunc("POST /account", service.PostAccount)
 	publicMux.HandleFunc("POST /account/login", service.PostAccountLogin)
+	publicMux.Handle("/", frontend)
 
 	privateMux := http.NewServeMux()
 	privateMux.HandleFunc("GET /test", func(w http.ResponseWriter, r *http.Request) {
-		user := backend.MustGetAccount(ctx)
+		user := blinkscan.MustGetAccount(ctx)
 		w.Write([]byte(fmt.Sprintf("Hello %s", user.Name)))
 	})
 
@@ -51,7 +53,7 @@ func main() {
 	})
 
 	mux.Handle("/api/", http.StripPrefix("/api", auth(privateMux)))
-	mux.Handle("/api/public/", http.StripPrefix("/api/public", publicMux))
+	mux.Handle("/", publicMux)
 
 	server := http.Server{
 		Addr:    ":8080",

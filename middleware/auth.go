@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
-	"github.com/pablu23/blinkscan/backend/database"
+	"github.com/pablu23/blinkscan/database"
 	"github.com/rs/zerolog/log"
 )
 

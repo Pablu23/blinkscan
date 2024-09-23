@@ -1,10 +1,10 @@
-package backend
+package blinkscan
 
 import (
 	"context"
 	"errors"
 
-	"github.com/pablu23/blinkscan/backend/database"
+	"github.com/pablu23/blinkscan/database"
 	"github.com/rs/zerolog/log"
 )
 

@@ -33,6 +33,7 @@ type Chapter struct {
 	ID      uuid.UUID
 	Title   string
 	Number  int32
+	Url     string
 	MangaID uuid.UUID
 }
 

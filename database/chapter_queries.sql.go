@@ -17,7 +17,7 @@ insert into chapter (
 ) values (
   $1, $2, $3
 )
-returning id, title, number, manga_id
+returning id, title, number, url, manga_id
 `
 
 type CreateChapterParams struct {
@@ -33,13 +33,14 @@ func (q *Queries) CreateChapter(ctx context.Context, arg CreateChapterParams) (C
 		&i.ID,
 		&i.Title,
 		&i.Number,
+		&i.Url,
 		&i.MangaID,
 	)
 	return i, err
 }
 
 const getChapter = `-- name: GetChapter :one
-select id, title, number, manga_id from chapter
+select id, title, number, url, manga_id from chapter
 where id = $1
 `
 
@@ -50,6 +51,7 @@ func (q *Queries) GetChapter(ctx context.Context, id uuid.UUID) (Chapter, error)
 		&i.ID,
 		&i.Title,
 		&i.Number,
+		&i.Url,
 		&i.MangaID,
 	)
 	return i, err
@@ -81,7 +83,7 @@ func (q *Queries) GetChapterImages(ctx context.Context, chapterID uuid.UUID) ([]
 }
 
 const getChapters = `-- name: GetChapters :many
-select id, title, number, manga_id from chapter
+select id, title, number, url, manga_id from chapter
 `
 
 func (q *Queries) GetChapters(ctx context.Context) ([]Chapter, error) {
@@ -97,6 +99,7 @@ func (q *Queries) GetChapters(ctx context.Context) ([]Chapter, error) {
 			&i.ID,
 			&i.Title,
 			&i.Number,
+			&i.Url,
 			&i.MangaID,
 		); err != nil {
 			return nil, err

@@ -1,13 +1,13 @@
 VERSION = v0.0.1
 
 build: 
-	go build -o bin/backend backend/cmd/blinkscan/backend/main.go
+	go build -o bin/blinkscan cmd/blinkscan/main.go
 
 gen-sql:
-	cd backend; sqlc generate
+	sqlc generate
 
 run: build
-	./bin/backend
+	./bin/blinkscan
 
 image: gen-sql
-	docker build ./backend/ -t pablu/blinkscan-backend:$(VERSION) -t pablu/blinkscan-backend:latest
+	docker build . -t pablu/blinkscan:$(VERSION) -t pablu/blinkscan:latest

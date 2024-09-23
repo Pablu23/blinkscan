@@ -1,6 +1,6 @@
-package backend
+package blinkscan
 
-import "github.com/pablu23/blinkscan/backend/database"
+import "github.com/pablu23/blinkscan/database"
 
 type Service struct {
 	db *database.Queries

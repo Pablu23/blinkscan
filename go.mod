@@ -1,4 +1,4 @@
-module github.com/pablu23/blinkscan/backend
+module github.com/pablu23/blinkscan
 
 go 1.23.1
 

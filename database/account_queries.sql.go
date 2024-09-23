@@ -156,7 +156,7 @@ func (q *Queries) GetSubscribedForAccount(ctx context.Context, accountID uuid.UU
 }
 
 const getViewedForAccountAndManga = `-- name: GetViewedForAccountAndManga :many
-select c.id, title, number, manga_id, avc.id, account_id, chapter_id, viewed_at
+select c.id, title, number, url, manga_id, avc.id, account_id, chapter_id, viewed_at
 from chapter as c
 join account_viewed_chapter as avc on avc.chapter_id = c.id
 where account_id = $1
@@ -172,6 +172,7 @@ type GetViewedForAccountAndMangaRow struct {
 	ID        uuid.UUID
 	Title     string
 	Number    int32
+	Url       string
 	MangaID   uuid.UUID
 	ID_2      uuid.UUID
 	AccountID uuid.UUID
@@ -192,6 +193,7 @@ func (q *Queries) GetViewedForAccountAndManga(ctx context.Context, arg GetViewed
 			&i.ID,
 			&i.Title,
 			&i.Number,
+			&i.Url,
 			&i.MangaID,
 			&i.ID_2,
 			&i.AccountID,

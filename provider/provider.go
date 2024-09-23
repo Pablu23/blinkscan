@@ -5,7 +5,7 @@ import (
 	"net/url"
 
 	"github.com/google/uuid"
-	"github.com/pablu23/blinkscan/backend/database"
+	"github.com/pablu23/blinkscan/database"
 	"github.com/rs/zerolog/log"
 )
 
@@ -48,7 +48,7 @@ func (a *AsuraToons) SearchMangas(name string) []database.Manga {
 	u.JoinPath("series")
 	u.Query().Add("name", name)
 
-	resp, err := http.Get(u.String())
+	_, err = http.Get(u.String())
 	if err != nil {
 		log.Error().Err(err).Str("url", u.String()).Str("provider", a.underlying.Name).Msg("Could not get Mangas")
 		return nil
