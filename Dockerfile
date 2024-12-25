@@ -10,6 +10,8 @@ RUN npm install
 COPY ./frontend .
 
 RUN ng build
+
+# This is supposed to not copy frontend for the backend stage, not sure if this is how it works
 RUN rm -rf ./frontend
 
 

@@ -11,3 +11,9 @@ run: build
 
 image: gen-sql
 	docker build . -t pablu/blinkscan:$(VERSION) -t pablu/blinkscan:latest
+
+dev: build-dev
+	./bin/dev
+
+build-dev:
+	go build -o bin/dev cmd/devcli/main.go

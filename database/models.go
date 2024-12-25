@@ -52,9 +52,9 @@ type Manga struct {
 	ID            uuid.UUID
 	ProviderID    uuid.UUID
 	Title         string
-	ThumbnailID   pgtype.UUID
+	ThumbnailID   uuid.UUID
 	LatestChapter pgtype.Int4
-	RequestedFrom pgtype.UUID
+	RequestedFrom uuid.UUID
 	LastUpdated   pgtype.Timestamp
 	Created       pgtype.Timestamp
 }

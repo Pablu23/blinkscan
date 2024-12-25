@@ -10,3 +10,9 @@ RETURNING *;
 select a.* from account as a
 join session as s on a.id = s.account_id
 where s.id = $1;
+
+-- name: RemoveSession :exec
+delete from session where id = $1;
+
+-- name: RemoveSessionForAccount :exec
+delete from session where account_id = $1;

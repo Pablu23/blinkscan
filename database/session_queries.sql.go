@@ -44,3 +44,21 @@ func (q *Queries) GetUserForSession(ctx context.Context, id uuid.UUID) (Account,
 	)
 	return i, err
 }
+
+const removeSession = `-- name: RemoveSession :exec
+delete from session where id = $1
+`
+
+func (q *Queries) RemoveSession(ctx context.Context, id uuid.UUID) error {
+	_, err := q.db.Exec(ctx, removeSession, id)
+	return err
+}
+
+const removeSessionForAccount = `-- name: RemoveSessionForAccount :exec
+delete from session where account_id = $1
+`
+
+func (q *Queries) RemoveSessionForAccount(ctx context.Context, accountID uuid.UUID) error {
+	_, err := q.db.Exec(ctx, removeSessionForAccount, accountID)
+	return err
+}

@@ -9,7 +9,6 @@ import (
 	"context"
 
 	"github.com/google/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 const createManga = `-- name: CreateManga :one
@@ -24,7 +23,7 @@ returning id, provider_id, title, thumbnail_id, latest_chapter, requested_from, 
 type CreateMangaParams struct {
 	ProviderID    uuid.UUID
 	Title         string
-	RequestedFrom pgtype.UUID
+	RequestedFrom uuid.UUID
 }
 
 func (q *Queries) CreateManga(ctx context.Context, arg CreateMangaParams) (Manga, error) {

@@ -93,22 +93,23 @@ func (s *Service) PostAccountLogin(w http.ResponseWriter, r *http.Request) {
 
 	hash := createPwdHash([]byte(loginCredentials.Password), salt)
 
-	if bytes.Equal(hash[:], expectedHash) {
-		log.Trace().Str("username", loginCredentials.Username).Msg("Login succeded")
-		w.WriteHeader(http.StatusOK)
-		session, err := s.db.CreateSession(ctx, acc.ID)
-		if err != nil {
-			log.Error().Err(err).Str("account", acc.ID.String()).Msg("Could not create session")
-			w.WriteHeader(http.StatusInternalServerError)
-			return
-		}
-
-		//TODO: Dont use uuid, use cryptographically secure "fingerprint"
-		w.Write([]byte(session.ID.String()))
-		//TODO: return jwt token
-	} else {
+	if !bytes.Equal(hash[:], expectedHash) {
 		log.Debug().Str("username", loginCredentials.Username).Msg("Login failed")
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
+
+	log.Trace().Str("username", loginCredentials.Username).Msg("Login succeded")
+	w.WriteHeader(http.StatusOK)
+
+	session, err := s.db.CreateSession(ctx, acc.ID)
+	if err != nil {
+		log.Error().Err(err).Str("account", acc.ID.String()).Msg("Could not create session")
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	//TODO: Dont use uuid, use cryptographically secure "fingerprint"
+	w.Write([]byte(session.ID.String()))
+	//TODO: return jwt token
 }

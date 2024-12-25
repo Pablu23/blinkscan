@@ -19,7 +19,7 @@ func Auth(db *database.Queries) func(http.Handler) http.Handler {
 			id, err := uuid.Parse(sessionId)
 			if err != nil {
 				log.Warn().Err(err).Str("session-id", sessionId).Msg("Could not convert session-id to uuid")
-				w.WriteHeader(http.StatusBadRequest)
+				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
 
