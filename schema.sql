@@ -19,6 +19,7 @@ create table account (
 create table manga (
   id uuid PRIMARY KEY not null default gen_random_uuid(),
   provider_id uuid not null,
+  internal_id string not null, 
   title text not null,
   thumbnail_id uuid not null,
   latest_chapter int,

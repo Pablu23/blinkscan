@@ -17,7 +17,7 @@ insert into manga (
 ) values (
   $1, $2, $3, NOW()
 )
-returning id, provider_id, title, thumbnail_id, latest_chapter, requested_from, last_updated, created
+returning id, provider_id, internal_id, title, thumbnail_id, latest_chapter, requested_from, last_updated, created
 `
 
 type CreateMangaParams struct {
@@ -32,6 +32,7 @@ func (q *Queries) CreateManga(ctx context.Context, arg CreateMangaParams) (Manga
 	err := row.Scan(
 		&i.ID,
 		&i.ProviderID,
+		&i.InternalID,
 		&i.Title,
 		&i.ThumbnailID,
 		&i.LatestChapter,
@@ -43,7 +44,7 @@ func (q *Queries) CreateManga(ctx context.Context, arg CreateMangaParams) (Manga
 }
 
 const getManga = `-- name: GetManga :one
-select id, provider_id, title, thumbnail_id, latest_chapter, requested_from, last_updated, created from manga
+select id, provider_id, internal_id, title, thumbnail_id, latest_chapter, requested_from, last_updated, created from manga
 where id = $1
 `
 
@@ -53,6 +54,7 @@ func (q *Queries) GetManga(ctx context.Context, id uuid.UUID) (Manga, error) {
 	err := row.Scan(
 		&i.ID,
 		&i.ProviderID,
+		&i.InternalID,
 		&i.Title,
 		&i.ThumbnailID,
 		&i.LatestChapter,
@@ -64,7 +66,7 @@ func (q *Queries) GetManga(ctx context.Context, id uuid.UUID) (Manga, error) {
 }
 
 const getMangas = `-- name: GetMangas :many
-select id, provider_id, title, thumbnail_id, latest_chapter, requested_from, last_updated, created from manga
+select id, provider_id, internal_id, title, thumbnail_id, latest_chapter, requested_from, last_updated, created from manga
 `
 
 func (q *Queries) GetMangas(ctx context.Context) ([]Manga, error) {
@@ -79,6 +81,7 @@ func (q *Queries) GetMangas(ctx context.Context) ([]Manga, error) {
 		if err := rows.Scan(
 			&i.ID,
 			&i.ProviderID,
+			&i.InternalID,
 			&i.Title,
 			&i.ThumbnailID,
 			&i.LatestChapter,
@@ -97,7 +100,7 @@ func (q *Queries) GetMangas(ctx context.Context) ([]Manga, error) {
 }
 
 const getMangasForUser = `-- name: GetMangasForUser :many
-select m.id, m.provider_id, m.title, m.thumbnail_id, m.latest_chapter, m.requested_from, m.last_updated, m.created from manga as m
+select m.id, m.provider_id, m.internal_id, m.title, m.thumbnail_id, m.latest_chapter, m.requested_from, m.last_updated, m.created from manga as m
 join account_subscribed_manga as asm on asm.manga_id = m.id
 where asm.account_id = $1
 `
@@ -114,6 +117,7 @@ func (q *Queries) GetMangasForUser(ctx context.Context, accountID uuid.UUID) ([]
 		if err := rows.Scan(
 			&i.ID,
 			&i.ProviderID,
+			&i.InternalID,
 			&i.Title,
 			&i.ThumbnailID,
 			&i.LatestChapter,

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -17,6 +18,12 @@ type Url string
 type SearchResult struct {
 	URL       Url
 	Thumbnail Url
+}
+
+type ChapterResult struct {
+	URL    Url
+	Number int
+	Title  string
 }
 
 type Provider interface {
@@ -58,22 +65,12 @@ func (a *AsuraToons) SearchMangas(name string) ([]SearchResult, error) {
 	q := u.Query()
 	q.Set("name", name)
 	u.RawQuery = q.Encode()
-	// fmt.Println(u.String())
 
 	resp, err := http.Get(u.String())
 	if err != nil {
 		log.Error().Err(err).Str("url", u.String()).Str("provider", a.underlying.Name).Msg("Could not get Mangas")
 		return nil, err
 	}
-
-	// html, err := io.ReadAll(resp.Body)
-	// if err != nil {
-	// 	return nil, err
-	// }
-
-	// _ = html
-	// fmt.Println(string(html))
-	// os.WriteFile("search.html", html, 0777)
 
 	doc, err := html.Parse(resp.Body)
 	if err != nil {
@@ -83,7 +80,29 @@ func (a *AsuraToons) SearchMangas(name string) ([]SearchResult, error) {
 	var traverse func(*html.Node) []SearchResult
 	traverse = func(n *html.Node) []SearchResult {
 		if n.Type == html.ElementNode && n.Data == "div" {
-			if res := proccessDiv(n); res != nil {
+			if checkDivForAttr(n, "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-3 p-4") {
+				res := make([]SearchResult, 0)
+				for c := n.FirstChild; c != nil; c = c.NextSibling {
+					href, err := extractHref(c)
+					if err != nil {
+						continue
+					}
+
+					imgNode := extractNested(c, "img")
+					if imgNode == nil {
+						continue
+					}
+
+					img, err := extractImg(imgNode)
+					if err != nil {
+						continue
+					}
+
+					res = append(res, SearchResult{
+						URL:       href,
+						Thumbnail: img,
+					})
+				}
 				return res
 			}
 		}
@@ -99,45 +118,28 @@ func (a *AsuraToons) SearchMangas(name string) ([]SearchResult, error) {
 	return res, nil
 }
 
-func proccessDiv(n *html.Node) []SearchResult {
+func checkDivForAttr(n *html.Node, attr string) bool {
 	for _, a := range n.Attr {
-		if a.Key == "class" && strings.Contains(a.Val, "grid grid-cols-2 sm:grid-cols-2 md:grid-cols-5 gap-3 p-4") {
-			res := make([]SearchResult, 0)
-			for c := n.FirstChild; c != nil; c = c.NextSibling {
-				href, err := extractHref(c)
-				if err != nil {
-					continue
-				}
-
-				img, err := extractNestedImg(c)
-				if err != nil {
-					continue
-				}
-
-				res = append(res, SearchResult{
-					URL:       href,
-					Thumbnail: img,
-				})
-			}
-			return res
+		if a.Key == "class" && strings.Contains(a.Val, attr) {
+			return true
 		}
 	}
-	return nil
+	return false
 }
 
-func extractNestedImg(n *html.Node) (Url, error) {
-	if n.Type == html.ElementNode && n.Data == "img" {
-		img, err := extractImg(n)
-		return img, err
+func extractNested(n *html.Node, data string) *html.Node {
+	if n.Type == html.ElementNode && n.Data == data {
+		return n
 	}
 
 	for c := n.FirstChild; c != nil; c = c.NextSibling {
-		img, err := extractNestedImg(c)
-		if err == nil {
-			return img, err
+		node := extractNested(c, data)
+		if node != nil {
+			return node
 		}
 	}
-	return Url(""), errors.New("Could not find Image")
+
+	return nil
 }
 
 func extractImg(n *html.Node) (Url, error) {
@@ -160,8 +162,67 @@ func extractHref(n *html.Node) (Url, error) {
 	return Url(""), errors.New("Could not find href")
 }
 
-func (a *AsuraToons) GetChapters(manga database.Manga) []database.Chapter {
-	panic("Implement Me :P")
+func (a *AsuraToons) GetChapters(manga database.Manga) []ChapterResult {
+	mangaUrl, err := url.JoinPath(a.underlying.Url, "series", manga.InternalID+"-00000000")
+	if err != nil {
+		return nil
+	}
+	resp, err := http.Get(mangaUrl)
+	if err != nil {
+		log.Error().Err(err).Str("url", mangaUrl).Str("provider", a.underlying.Name).Str("manga_id", manga.ID.String()).Msg("Could not get Mangas")
+		return nil
+	}
+	defer resp.Body.Close()
+	doc, err := html.Parse(resp.Body)
+	if err != nil {
+		panic("")
+	}
+
+	res := make([]ChapterResult, 0)
+	var traverse func(*html.Node)
+	traverse = func(n *html.Node) {
+		if n.Type == html.ElementNode && n.Data == "div" {
+			if checkDivForAttr(n, "pl-4 py-2 border rounded-md group w-full hover:bg-[#343434] cursor-pointer border-[#A2A2A2]/20 relative") {
+				href, err := extractHref(n.FirstChild)
+				if err != nil {
+					return
+				}
+				curr := n.FirstChild
+
+				var chapterName string = ""
+				for c := curr.FirstChild; c != nil; c = c.NextSibling {
+					if c.Data == "h3" && checkDivForAttr(c, "text-white") {
+						spanNode := extractNested(c, "span")
+						if spanNode != nil {
+							if spanNode.FirstChild != nil {
+								chapterName = spanNode.FirstChild.Data
+							}
+						}
+					}
+				}
+
+				number := 0
+				parts := strings.Split(string(href), "/")
+				if len(parts) >= 0 {
+					num := parts[len(parts)-1]
+					number, _ = strconv.Atoi(num)
+				}
+
+				res = append(res, ChapterResult{
+					URL:    href,
+					Number: number,
+					Title:  chapterName,
+				})
+			}
+		}
+
+		for c := n.FirstChild; c != nil; c = c.NextSibling {
+			traverse(c)
+		}
+	}
+	traverse(doc)
+
+	return res
 }
 
 func (a *AsuraToons) GetChapterImages(chapter database.Chapter) []database.ChapterImage {

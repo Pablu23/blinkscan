@@ -51,6 +51,7 @@ type Image struct {
 type Manga struct {
 	ID            uuid.UUID
 	ProviderID    uuid.UUID
+	InternalID    string
 	Title         string
 	ThumbnailID   uuid.UUID
 	LatestChapter pgtype.Int4

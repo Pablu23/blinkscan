@@ -103,7 +103,7 @@ func (q *Queries) GetAccounts(ctx context.Context) ([]Account, error) {
 }
 
 const getSubscribedForAccount = `-- name: GetSubscribedForAccount :many
-select m.id, provider_id, title, thumbnail_id, latest_chapter, requested_from, last_updated, created, asm.id, account_id, manga_id 
+select m.id, provider_id, internal_id, title, thumbnail_id, latest_chapter, requested_from, last_updated, created, asm.id, account_id, manga_id 
 from manga as m
 join account_subscribed_manga as asm on asm.manga_id = m.id
 where asm.account_id = $1
@@ -112,6 +112,7 @@ where asm.account_id = $1
 type GetSubscribedForAccountRow struct {
 	ID            uuid.UUID
 	ProviderID    uuid.UUID
+	InternalID    string
 	Title         string
 	ThumbnailID   uuid.UUID
 	LatestChapter pgtype.Int4
@@ -135,6 +136,7 @@ func (q *Queries) GetSubscribedForAccount(ctx context.Context, accountID uuid.UU
 		if err := rows.Scan(
 			&i.ID,
 			&i.ProviderID,
+			&i.InternalID,
 			&i.Title,
 			&i.ThumbnailID,
 			&i.LatestChapter,
