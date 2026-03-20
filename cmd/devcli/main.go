@@ -10,7 +10,17 @@ import (
 )
 
 func main() {
-	testSearchMangas()
+	// testSearchMangas()
+	// testGetChapters()
+	testImages()
+}
+
+func testImages() {
+	chapter := database.Chapter{
+		Url: "somebody-stop-the-pope-9df9d5f9/chapter/22",
+	}
+
+	provider.AsuraToon.GetChapterImages(chapter)
 }
 
 func testSearchMangas() {
